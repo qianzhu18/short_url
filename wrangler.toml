@@ -1,7 +1,7 @@
 account_id = "1e1b04d71f7d0f223bc1f2af2a56bac9"
 compatibility_date = "2022-09-22"
 main = "./src/index.js"
-name = "atomic-url"
+name = "short-url"
 
 kv_namespaces = [
   {binding = "URL_DB", id = "ffe1778b6dcb4067b65d6f56ca092246", preview_id = "5a0d0e8cc73d4faa8d945865bd353ab5"},
@@ -11,6 +11,9 @@ workers_dev = true
 [vars]
 URL_CACHE = "apiCache" 
 URL_EXPIRATION_TTL = 3600 # seconds
+
+[build.upload]
+format = "modules"
 
 [dev]
 ip = "0.0.0.0"
@@ -32,7 +35,7 @@ URL_EXPIRATION_TTL = 3600 # seconds
 kv_namespaces = [
   {binding = "URL_DB", id = "249d3959e7154972ae483c57c6feb68c"},
 ]
-name = "atomic-url"
+name = "short-url"
 route = "short.qianzhu.me/*"
 workers_dev = false
 [env.production.vars]
