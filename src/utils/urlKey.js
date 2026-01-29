@@ -7,13 +7,12 @@ Generate a unique `urlKey` using `nanoid` package.
 
 Keep retrying until a unique urlKey which does not exist in the URL_DB.
 */
-export const generateUniqueUrlKey = async () => {
-    /* eslint-disable no-undef */
+export const generateUniqueUrlKey = async (urlDb) => {
     const nanoId = customAlphabet(ALPHABET, 8)
 
     let urlKey = nanoId()
 
-    while ((await URL_DB.get(urlKey)) !== null) {
+    while ((await urlDb.get(urlKey)) !== null) {
         urlKey = nanoId()
     }
 

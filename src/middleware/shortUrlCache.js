@@ -5,7 +5,7 @@ Do note that Cache API is not enabled on `workers.dev`.
 
 You will need to deploy this over a custom domain to see it work.
 */
-export const shortUrlCacheMiddleware = async (request) => {
+export const shortUrlCacheMiddleware = async (request, env) => {
     const { originalUrl } = await request.clone().json()
 
     if (!originalUrl) {
@@ -14,8 +14,7 @@ export const shortUrlCacheMiddleware = async (request) => {
         })
     }
 
-    /* eslint-disable no-undef */
-    const cache = await caches.open(URL_CACHE)
+    const cache = await caches.open(env.URL_CACHE)
     const response = await cache.match(originalUrl)
 
     if (response) {

@@ -1,4 +1,3 @@
-/* eslint-disable no-undef */
 import LANDING_PAGE_HTML from './index.html'
 
 import { Router } from 'itty-router'
@@ -10,11 +9,12 @@ import { turnstileMiddleware } from './middleware/turnstile'
 
 const router = Router()
 
-const turnstileSiteKey = typeof TURNSTILE_SITE_KEY === 'string' ? TURNSTILE_SITE_KEY : ''
-const landingPageHtml = LANDING_PAGE_HTML.replaceAll('__TURNSTILE_SITE_KEY__', turnstileSiteKey)
-
 // GET landing page html
-router.get('/', () => new Response(landingPageHtml, { headers: { 'Content-Type': 'text/html;charset=UTF-8' } }))
+router.get('/', (request, env) => {
+    const turnstileSiteKey = typeof env.TURNSTILE_SITE_KEY === 'string' ? env.TURNSTILE_SITE_KEY : ''
+    const landingPageHtml = LANDING_PAGE_HTML.replaceAll('__TURNSTILE_SITE_KEY__', turnstileSiteKey)
+    return new Response(landingPageHtml, { headers: { 'Content-Type': 'text/html;charset=UTF-8' } })
+})
 
 // GET redirects short URL to its original URL.
 router.get('/:text', redirectShortUrl)
@@ -23,6 +23,8 @@ router.get('/:text', redirectShortUrl)
 router.post('/api/url', turnstileMiddleware, shortUrlCacheMiddleware, siteFilterMiddleware, createShortUrl)
 
 // All incoming requests are passed to the router where your routes are called and the response is sent.
-addEventListener('fetch', (e) => {
-    e.respondWith(router.handle(e.request, e))
-})
+export default {
+    fetch(request, env, ctx) {
+        return router.handle(request, env, ctx)
+    },
+}
