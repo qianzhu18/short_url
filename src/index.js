@@ -1,3 +1,4 @@
+/* eslint-disable no-undef */
 import LANDING_PAGE_HTML from './index.html'
 
 import { Router } from 'itty-router'
@@ -9,8 +10,11 @@ import { turnstileMiddleware } from './middleware/turnstile'
 
 const router = Router()
 
+const turnstileSiteKey = typeof TURNSTILE_SITE_KEY === 'string' ? TURNSTILE_SITE_KEY : ''
+const landingPageHtml = LANDING_PAGE_HTML.replaceAll('__TURNSTILE_SITE_KEY__', turnstileSiteKey)
+
 // GET landing page html
-router.get('/', () => new Response(LANDING_PAGE_HTML, { headers: { 'Content-Type': 'text/html;charset=UTF-8' } }))
+router.get('/', () => new Response(landingPageHtml, { headers: { 'Content-Type': 'text/html;charset=UTF-8' } }))
 
 // GET redirects short URL to its original URL.
 router.get('/:text', redirectShortUrl)

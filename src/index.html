@@ -4,7 +4,7 @@
         <meta charset="utf-8" />
         <meta http-equiv="X-UA-Compatible" content="IE=edge" />
         <meta name="viewport" content="width=device-width, initial-scale=1" />
-        <title>Atomic URL</title>
+        <title>QianZhu URL - 链接缩短服务</title>
         <link
             rel="icon"
             type="image/png"
@@ -26,10 +26,27 @@
             gtag('config', 'G-6J3E1FBFRM')
         </script>
         <script>
-            let sitekey = '0x4AAAAAAAAujdqolLL946vD'
+            let sitekey = '__TURNSTILE_SITE_KEY__'
             let turnstileToken
 
+            const isTurnstileConfigured = () => Boolean(sitekey)
+            const showTurnstileConfigError = (message) => {
+                const widget = document.getElementById('cf-turnstile-widget')
+                if (widget) {
+                    widget.innerHTML = `<p class="has-text-danger is-size-7">${message}</p>`
+                }
+                const submitButton = document.getElementById('submit')
+                if (submitButton) {
+                    submitButton.setAttribute('disabled', 'disabled')
+                }
+            }
+
             window.onloadTurnstileCallback = function () {
+                if (!isTurnstileConfigured()) {
+                    showTurnstileConfigError('Turnstile 未配置，请联系站点管理员。')
+                    return
+                }
+
                 const turnstileOptions = {
                     sitekey,
                     theme: 'light',
@@ -50,10 +67,26 @@
 
                 statusElement.classList.add('is-loading')
 
+                if (!isTurnstileConfigured()) {
+                    statusElement.classList.remove('is-loading')
+                    statusElement.innerHTML = '⛔ Turnstile 未配置，请联系站点管理员'
+                    return
+                }
+
+                if (!turnstileToken) {
+                    statusElement.classList.remove('is-loading')
+                    statusElement.innerHTML = '⛔ 请先完成验证（如果提示“无效域”，请检查 Turnstile 域名设置）'
+                    return
+                }
+
                 const originalUrl = originalUrlElement.value
                 const body = JSON.stringify({ originalUrl, turnstileToken })
 
-                const res = await fetch('/api/url', { method: 'POST', body })
+                const res = await fetch('/api/url', {
+                    method: 'POST',
+                    headers: { 'Content-Type': 'application/json' },
+                    body,
+                })
                 statusElement.classList.remove('is-loading')
 
                 if (res.status === 200) {
@@ -64,7 +97,10 @@
                 }
 
                 originalUrlElement.value = ''
-                turnstile.reset('#cf-turnstile-widget')
+                if (window.turnstile && isTurnstileConfigured()) {
+                    turnstile.reset('#cf-turnstile-widget')
+                }
+                turnstileToken = undefined
             }
 
             const copyToClipboard = (elementId) => {
@@ -84,34 +120,29 @@
                 <div class="column is-8 is-offset-2 register">
                     <div class="columns">
                         <div class="column left">
-                            <h1 class="title is-1">Atomic URL</h1>
-                            <h2 class="subtitle colored is-4">A URL shortener POC built using Cloudflare Worker.</h2>
+                            <h1 class="title is-1">QianZhu URL</h1>
+                            <h2 class="subtitle colored is-4">简洁高效的链接缩短服务</h2>
                             <p>
-                                Designing a URL shortener such as <a href="https://tinyurl.com/">TinyURL</a> and <a href="https://bitly.com/">Bitly</a> is one
-                                of the most common System Design interview questions in software engineering.
+                                将你的长链接转换为简短易分享的链接。适用于博客文章、社交媒体分享等场景。
                             </p>
                             <br />
                             <p>
-                                While meddling around with <a href="https://workers.cloudflare.com/">Cloudflare Worker</a>, it gave me an idea to build an
-                                actual URL shortener that can be used by anyone.
+                                基于 Cloudflare Workers 构建，全球 CDN 加速，稳定可靠。
                             </p>
                             <br />
                             <p>
-                                This is a proof of concept (POC) of how one builds an actual URL shortener service using serverless computing (<a
-                                    href="https://github.com/ngshiheng/atomic-url"
-                                    >source code</a
-                                >).
+                                简单易用：粘贴链接 → 生成短链接 → 开始分享
                             </p>
                             <br />
-                            <p><a href="https://jerrynsh.com/i-built-my-own-tiny-url/">Continue reading</a>...</p>
+                            <p>访问 <a href="https://qianzhu.me">qianzhu.me</a> 了解更多</p>
                         </div>
                         <div class="column right has-text-centered icon-text">
-                            <h1 class="title is-4">Shorten A URL</h1>
+                            <h1 class="title is-4">缩短链接</h1>
                             <div class="icon-text">
                                 <span class="icon has-text-info">
                                     <i class="fas fa-info-circle"></i>
                                 </span>
-                                <span class="description">Enter a valid URL to shorten</span>
+                                <span class="description">输入需要缩短的链接</span>
                             </div>
                             <br />
                             <div class="field">
@@ -119,7 +150,7 @@
                                     <input
                                         class="input is-link is-primary is-medium is-rounded"
                                         type="url"
-                                        placeholder="https://jerrynsh.com"
+                                        placeholder="https://qianzhu.me/article/..."
                                         id="url"
                                         required
                                     />
@@ -130,7 +161,7 @@
                                 <div id="cf-turnstile-widget"></div>
                                 <!-- end. -->
                             </div>
-                            <button id="submit" class="button is-block is-primary is-rounded is-fullwidth is-medium" onclick="submitURL()">Shorten</button>
+                            <button id="submit" class="button is-block is-primary is-rounded is-fullwidth is-medium" onclick="submitURL()">生成短链接</button>
                             <br />
                             <button class="button is-info is-rounded is-small" onclick="copyToClipboard('status')">
                                 <span class="icon">
@@ -146,7 +177,7 @@
                     <nav class="level">
                         <div class="level-right">
                             <small class="level-item" style="color: var(--textLight)">
-                                &copy; Atomic URL by&nbsp<a href="https://jerrynsh.com/">Jerry Ng</a>. All Rights Reserved.
+                                &copy; 2025 QianZhu URL - Powered by <a href="https://qianzhu.me">qianzhu.me</a>
                             </small>
                         </div>
                     </nav>
