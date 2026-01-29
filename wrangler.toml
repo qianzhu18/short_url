@@ -1,7 +1,7 @@
 account_id = "1e1b04d71f7d0f223bc1f2af2a56bac9"
 compatibility_date = "2022-09-22"
 main = "./src/index.js"
-name = "atomic-url"
+name = "short-url"
 
 kv_namespaces = [
   {binding = "URL_DB", id = "ffe1778b6dcb4067b65d6f56ca092246", preview_id = "5a0d0e8cc73d4faa8d945865bd353ab5"},
